@@ -15,7 +15,7 @@ obj.license = "MIT - https://opensource.org/licenses/MIT"
 
 local log = hs.logger.new('bear', 'info')
 
-local xcall = require("xcall")
+local xcall = dofile(hs.spoons.resourcePath("xcall.lua"))
 local etlua = dofile(hs.spoons.resourcePath("etlua.lua"))
 
 obj.token = nil
@@ -27,8 +27,8 @@ function obj:openByTitle(title, show_window, edit)
     if show_window == false then
         show_window = "no"
     end
-    if edit == false then
-        edit = "no"
+    if edit then
+        edit = "yes"
     end
     local params = {show_window = show_window, edit = edit, title = title}
     log.d('Opening note: ' .. title)
