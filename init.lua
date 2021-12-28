@@ -206,14 +206,21 @@ end
 ---
 --- Returns:
 ---  * string - identifier of the new note, or nil on failure
-function obj:createFromTemplate(tid)
+function obj:createFromTemplate(tid, env)
     resp = xcall.call("bear", "open-note", {id = tid})
     if not resp then
         log.e("Failed to open template note", tid)
         return nil
     end
     log.d("creating from template:", resp.title)
-    local output = etlua.render(resp.note, obj.template_env)
+    if env then
+        for k, v in pairs(obj.template_env) do
+            env[k] = v
+        end
+    else
+        env = obj.template_env
+    end
+    local output = etlua.render(resp.note, env)
     if not output then
         log.e("Failed to compile template note", tid)
         return nil
@@ -229,24 +236,24 @@ end
 
 -- some functions to use in templates
 
-local function startOfDay()
-    local n = os.date("*t")
+local function startOfDay(n)
+    n = os.date("*t", n)
     n.hour = 0
     n.min = 0
     n.sec = 0
     return n
 end
 
-local function today()
-    return os.time(startOfDay())
+local function today(t)
+    return os.time(startOfDay(t))
 end
 
-local function tomorrow()
-    return os.time(startOfDay()) + 86400
+local function tomorrow(t)
+    return os.time(startOfDay(t)) + 86400
 end
 
-local function yesterday()
-    return os.time(startOfDay()) - 86400
+local function yesterday(t)
+    return os.time(startOfDay(t)) - 86400
 end
 
 local function date(t)
