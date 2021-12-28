@@ -1,7 +1,40 @@
 -- bear.lua
--- interact with the Bear app from Hammerspoon, using the xcall library
--- which uses the x-callback-url mechanism to communicate with Bear.
--- Uses etlua for simple templating language
+--[[
+    This module wraps some of the Bear "x-callback-url" API
+    ( https://bear.app/faq/X-callback-url%20Scheme%20documentation/ ) with
+    convenience Lua functions. The wrapping is done using the xcall command-line
+    tool which implements the x-callback-url in a synchronous fashion.
+    The bottom line is that you can automate Bear from Hammerspoon.
+
+    In addition to implementing the Bear API, this module also implements a simple
+    templating system, using the "etlua" template engine
+    (https://github.com/leafo/etlua). To use the templates, just create a Bear note
+    that containes template text, and then call the `createFromTemplate` method.
+    (You likely want to bind this to a hotkey). The template text can access
+    any Hammerspoon / Lua function -- so be careful.
+    
+    For example, if your note looks like this:
+
+    ```
+    # A simple bear note template
+
+    Today is <%= os.date("%A, %B %d, %Y") %>. Have a nice day.
+    ```
+
+    When you call `createFromTemplate` the new note will look something like:
+
+    ```
+    # A simple bear note template
+
+    Today is Monday, December 31, 2019. Have a nice day.
+    ```
+
+    See the [etlua](https://github.com/leafo/etlua) documentation for more details.
+    The template is evaluated with access to additional symbols defined in the
+    `template_env` table. Some convenience functions are pre-defined -- see the
+    definitions at the bottom of this file.
+]]
+
 
 local obj = {}
 obj.__index = obj
@@ -108,37 +141,6 @@ function obj:getCurrent()
     return xcall.call("bear", "open-note", {token = obj.token, selected = "yes"})
 end
 
---- bear:createFromTemplate(tid)
---- method
---- Create a new note from a template note. Sewe the template documentation
---- at the top of this file.
----
---- Parameters:
---- * tid - the id of the template note
----
---- Returns:
----  * string - identifier of the new note, or nil on failure
-function obj:createFromTemplate(tid)
-    resp = xcall.call("bear", "open-note", {id = tid})
-    if not resp then
-        log.e("Failed to open template note", tid)
-        return nil
-    end
-    log.d("creating from template:", resp.title)
-    local output = etlua.render(resp.note, obj.template_env)
-    if not output then
-        log.e("Failed to compile template note", tid)
-        return nil
-    end
-    resp = xcall.call("bear", "create",
-                      {show_window = "yes", edit = "yes", text = output})
-    if not resp then
-        log.e("Failed to create note from template", tid)
-        return nil
-    end
-    return resp.identifier
-end
-
 --- bear:search(term)
 --- method
 --- Search Bear using the given term, returning a table of results.
@@ -190,6 +192,77 @@ function obj:replaceContent(nid, content)
     if not resp then
         log.e("Failed to update note", nid)
     end
+end
+
+--- Templates
+
+--- bear:createFromTemplate(tid)
+--- method
+--- Create a new note from a template note. Sewe the template documentation
+--- at the top of this file.
+---
+--- Parameters:
+--- * tid - the id of the template note
+---
+--- Returns:
+---  * string - identifier of the new note, or nil on failure
+function obj:createFromTemplate(tid)
+    resp = xcall.call("bear", "open-note", {id = tid})
+    if not resp then
+        log.e("Failed to open template note", tid)
+        return nil
+    end
+    log.d("creating from template:", resp.title)
+    local output = etlua.render(resp.note, obj.template_env)
+    if not output then
+        log.e("Failed to compile template note", tid)
+        return nil
+    end
+    resp = xcall.call("bear", "create",
+                      {show_window = "yes", edit = "yes", text = output})
+    if not resp then
+        log.e("Failed to create note from template", tid)
+        return nil
+    end
+    return resp.identifier
+end
+
+-- some functions to use in templates
+
+local function startOfDay()
+    local n = os.date("*t")
+    n.hour = 0
+    n.min = 0
+    n.sec = 0
+    return n
+end
+
+function obj.template_env.today()
+    return os.time(startOfDay())
+end
+
+function obj.template_env.tomorrow()
+    return os.time(startOfDay()) + 86400
+end
+
+function obj.template_env.yesterday()
+    return os.time(obj.template_envstartOfDay()) - 86400
+end
+
+function obj.template_env.fullDate(t)
+    -- return a full datestring like "Monday, January 1, 1970"
+    return os.date("%A, %B %d, %Y", t)
+end
+
+function obj.template_env.isodate(t)
+    -- return an ISO datestring like "1970-01-01"
+    return os.date("%Y-%m-%d", t)
+end
+
+function obj.template_env.link(id, title)
+    -- return a x-callback-url link as a string to open a note in Bear,
+    -- by either id or title
+    return bear:getLink(id, title)
 end
 
 return obj
