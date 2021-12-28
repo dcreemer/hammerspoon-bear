@@ -237,32 +237,41 @@ local function startOfDay()
     return n
 end
 
-function obj.template_env.today()
+local function today()
     return os.time(startOfDay())
 end
 
-function obj.template_env.tomorrow()
+local function tomorrow()
     return os.time(startOfDay()) + 86400
 end
 
-function obj.template_env.yesterday()
-    return os.time(obj.template_envstartOfDay()) - 86400
+local function yesterday()
+    return os.time(startOfDay()) - 86400
 end
 
-function obj.template_env.fullDate(t)
-    -- return a full datestring like "Monday, January 1, 1970"
-    return os.date("%A, %B %d, %Y", t)
+local function date(t)
+    -- return a nice datestring like "January 1, 1970"
+    return os.date("%B %d, %Y", t)
 end
 
-function obj.template_env.isodate(t)
+local function isodate(t)
     -- return an ISO datestring like "1970-01-01"
     return os.date("%Y-%m-%d", t)
 end
 
-function obj.template_env.link(id, title)
+local function link(id, title)
     -- return a x-callback-url link as a string to open a note in Bear,
     -- by either id or title
-    return bear:getLink(id, title)
+    return obj:getLink(id, title)
 end
+
+obj.template_env = {
+    today = today,
+    tomorrow = tomorrow,
+    yesterday = yesterday,
+    date = date,
+    isodate = isodate,
+    link = link,
+}
 
 return obj
