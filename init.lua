@@ -452,14 +452,6 @@ local function activateApp(bundleId)
     end
 end
 
--- default fn for creating the title of a new Daily Journal note:
-local function journalTitle(t)
-    return "Journal for " .. os.date("%b %d, %Y", t)
-end
-
-obj.template_env["journalTitle"] = journalTitle
-obj.template_env["journalTemplateId"] = nil
-
 -- parse date
 local function parseDate(dateStr)
     local y, m, d = dateStr:match("(%d+)%-(%d+)%-(%d+)")
@@ -715,13 +707,50 @@ end
 --- Object initialization
 ---
 
-function obj.init(api_token, journal_template_id, journal_name_fn)
-    obj.token = api_token
-    if journal_template_id then
-        obj.template_env["journalTemplateId"] = journal_template_id
+function obj.initFromNote()
+    local config = "Hammerspoon-Bear Configuration"
+    log.i("Looking for a note called '" .. config .. "' for the following settings:")
+    log.i("  bearToken (a string)")
+    log.i("  journalTemplateId (a string)")
+    log.i("  journalTitle (a function)")
+    note = obj:getNoteDB(nil, config)
+    if note then
+        log.i("found configuration note")
+        code = string.match(note.note, "\n```lua\n(.-)\n```")
+        if code then
+            f = load(code)
+            if f then
+                f()
+                if bearToken ~= nil then
+                    log.i("bearToken found")
+                    obj.token = bearToken
+                    bearToken = nil
+                end
+                if journalTemplateId ~= nil then
+                    log.i("journal template:", journalTemplateId)
+                    obj.template_env["journalTemplateId"] = journalTemplateId
+                    journalTemplateId = nil
+                end
+                if journalTitle ~= nil then
+                    log.i("defined journal title function.")
+                    obj.template_env["journalTitle"] = journalTitle
+                end
+            end
+        end
     end
-    if journal_name_fn then
-        obj.template_env["journalTitle"] = journalTitle
+end
+
+function obj.init(api_token)
+    obj.token = api_token
+    obj.initFromNote()
+    if obj.token == nil then
+        log.w("no bear API token")
+    end
+    if obj.template_env["journalTemplateId"] == nil then
+        log.w("no journal template ID found")
+    end
+    if obj.template_env["journalTitle"] == nil then
+        log.w("no journal title function found")
     end
     urlevent.bind("bear", _callbackHandler)
 end
