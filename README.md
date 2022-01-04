@@ -20,6 +20,18 @@ enhance the functionality of [Bear.app](https://bear.app/).
 
 Each of these features is explained below.
 
+## Installation
+
+To install this Spoon, either clone this repository to your
+`~/.hammerspoon/Spoons/` directory as "Bear.spoon" or download the latest release
+[zip file](https://github.com/dcreemer/hammerspoon-bear/releases) and extract
+the contents to that directory (renaming the directory to "Bear.spoon").
+
+```sh
+$ cd ~/.hammerpoon/Spoons/
+$ git clone https://github.com/dcreemer/hammerspoon-bear.git Bear.spoon
+```
+
 ## Configuration
 
 Load the spoon in your Hammerspoon config file, and initialize it with your [Bear
