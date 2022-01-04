@@ -22,7 +22,8 @@ Each of these features is explained below.
 
 ## Demo
 
-Here's a brief video demonstrating some of the features:
+Here's a brief video demonstrating some of the features (click the image to play
+it on YouTube):
 
 [![video of features](https://img.youtube.com/vi/Hg0oS2m4czY/0.jpg)](https://www.youtube.com/watch?v=Hg0oS2m4czY)
 
