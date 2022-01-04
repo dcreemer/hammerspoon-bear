@@ -269,11 +269,16 @@ something like this:
 
 ![](chooser.png)
 
+## Example
+
+For an example of how to use this module in your own Hammerspoon configuraiton,
+see my [personal .hammerspoon](https://github.com/dcreemer/dotfiles/tree/main/dot_hammerspoon) directory.
 
 ---
-Copyright (c) 2021 D. Creemer. MIT License.
+Copyright (c) 2022 D. Creemer. MIT License.
 
-Some original code, and many bits and pieces of code adapted from:
+Some original code, and many bits and pieces of code adapted from these
+projects. I am very greatful to the authors for sharing their code.
 
 * https://github.com/leafo/etlua
 * https://github.com/cdzombak/bear-backlinks
