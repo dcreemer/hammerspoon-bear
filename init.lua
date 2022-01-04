@@ -4,7 +4,7 @@
 
     1. An API for accessing, modifying, and createing Bear notes.
     2. A templating system for creating new notes based on other Bear notes
-       treaded as a template.
+       treated as a template.
     3. A Daily Journal system for creating and managing a the concept of a
        "Daily" note.
     4. A backlinks processing system, for automatically inserting so-called
