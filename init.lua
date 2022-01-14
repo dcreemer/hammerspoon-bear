@@ -693,9 +693,9 @@ function obj.noteChooser()
                 obj:openTag(c.tag)
             else
                 obj:openNote(c.id, nil, true, true)
+                eventtap.keyStroke({'cmd'}, 'up', 0)
+                eventtap.keyStroke({}, 'down', 0)
             end
-            eventtap.keyStroke({'cmd'}, 'up', 0)
-            eventtap.keyStroke({}, 'down', 0)
         end
     end)
     -- f.chooser:fgColor({hex="#bbf"})
